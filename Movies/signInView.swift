@@ -4,6 +4,14 @@ struct SignInView: View {
 
     @State private var email = ""
     @State private var password = ""
+    @State private var showPassword = false
+
+    // 🔴 invalid state
+    @State private var emailInvalid = false
+    @State private var passwordInvalid = false
+
+    @FocusState private var focusedField: Field?
+    enum Field { case email, password }
 
     var body: some View {
         ZStack {
@@ -13,16 +21,15 @@ struct SignInView: View {
                 .resizable()
                 .scaledToFit()
                 .ignoresSafeArea()
-                .offset(y: -50)   // move UP
-                .offset(x: 50)    // move RIGHT
+                .offset(y: -50)
+                .offset(x: 50)
                 .offset(x: -50)
 
             Image("layersignin")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-                .opacity(1)
-              
+
             VStack(alignment: .leading, spacing: 17) {
 
                 Spacer()
@@ -40,12 +47,28 @@ struct SignInView: View {
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(Color("gray1"))
 
-                TextField("Academy23@gmail.com", text: $email)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 14)
-                    .background(Color("gray2").opacity(0.26))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .foregroundStyle(Color("white"))
+                TextField(
+                    "",
+                    text: $email,
+                    prompt: Text("Enter your Email")
+                        .foregroundStyle(Color("gray1").opacity(0.55))
+                )
+            
+                .focused($focusedField, equals: .email)
+                .padding(.vertical, 14)
+                .padding(.horizontal, 14)
+                .background(Color("gray2").opacity(0.26))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(
+                            emailInvalid
+                            ? Color.red
+                            : (focusedField == .email ? Color("gold1") : Color.clear),
+                            lineWidth: 2.5
+                        )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .foregroundStyle(Color("white"))
 
                 // Password
                 Text("Password")
@@ -53,21 +76,51 @@ struct SignInView: View {
                     .foregroundStyle(Color("gray1"))
 
                 HStack {
-                    SecureField("N346455_4", text: $password)
+                    if showPassword {
+                        TextField(
+                            "",
+                            text: $password,
+                            prompt: Text("Enter your Password")
+                                .foregroundStyle(Color("gray1").opacity(0.55))
+                        )
+                        .focused($focusedField, equals: .password)
                         .foregroundStyle(Color("white"))
+                    } else {
+                        SecureField(
+                            "",
+                            text: $password,
+                            prompt: Text("Enter your Password")
+                                .foregroundStyle(Color("gray1").opacity(0.55))
+                        )
+                        .focused($focusedField, equals: .password)
+                        .foregroundStyle(Color("white"))
+                    }
 
-                    Button(action: {}) {
-                        Image(systemName: "eye")
+                    Button {
+                        showPassword.toggle()
+                    } label: {
+                        Image(systemName: showPassword ? "eye.slash" : "eye")
                             .foregroundStyle(Color.gray)
                     }
                 }
                 .padding(.vertical, 14)
                 .padding(.horizontal, 14)
                 .background(Color("gray2").opacity(0.26))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(
+                            passwordInvalid
+                            ? Color.red
+                            : (focusedField == .password ? Color("gold1") : Color.clear),
+                            lineWidth: 2.5
+                        )
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
                 // Sign in button
-                Button(action: {}) {
+                Button {
+                    validateFields()
+                } label: {
                     Text("Sign in")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(Color("black"))
@@ -83,6 +136,12 @@ struct SignInView: View {
             .padding(.horizontal, 24)
             .offset(y: 170)
         }
+    }
+
+    // ✅ simple validation
+    func validateFields() {
+        emailInvalid = !email.contains("@") || !email.contains(".")
+        passwordInvalid = password.count < 8
     }
 }
 
