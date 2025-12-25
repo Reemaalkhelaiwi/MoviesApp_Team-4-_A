@@ -5,18 +5,19 @@ struct SignInView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var showPassword = false
-
-    // 🔴 invalid state
     @State private var emailInvalid = false
     @State private var passwordInvalid = false
 
     @FocusState private var focusedField: Field?
     enum Field { case email, password }
 
+    var isFormValid: Bool {
+        !emailInvalid && !passwordInvalid && !email.isEmpty && !password.isEmpty
+    }
+
     var body: some View {
         ZStack {
 
-            // Background image
             Image("signinbackground")
                 .resizable()
                 .scaledToFit()
@@ -42,7 +43,6 @@ struct SignInView: View {
                     .font(.system(size: 18))
                     .foregroundStyle(Color("white"))
 
-                // Email
                 Text("Email")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(Color("gray1"))
@@ -53,7 +53,6 @@ struct SignInView: View {
                     prompt: Text("Enter your Email")
                         .foregroundStyle(Color("gray1").opacity(0.55))
                 )
-            
                 .focused($focusedField, equals: .email)
                 .padding(.vertical, 14)
                 .padding(.horizontal, 14)
@@ -70,7 +69,6 @@ struct SignInView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .foregroundStyle(Color("white"))
 
-                // Password
                 Text("Password")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(Color("gray1"))
@@ -117,7 +115,7 @@ struct SignInView: View {
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                // Sign in button
+              
                 Button {
                     validateFields()
                 } label: {
@@ -126,7 +124,7 @@ struct SignInView: View {
                         .foregroundStyle(Color("black"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color("gray1"))
+                        .background(isFormValid ? Color("gold1") : Color("gray1"))
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .padding(.top, 10)
@@ -138,7 +136,6 @@ struct SignInView: View {
         }
     }
 
-    // ✅ simple validation
     func validateFields() {
         emailInvalid = !email.contains("@") || !email.contains(".")
         passwordInvalid = password.count < 8
